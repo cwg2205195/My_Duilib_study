@@ -4,18 +4,70 @@
 #include "pch.h"
 #include <iostream>
 
-int main()
+class MainWndFrame : public WindowImplBase
 {
-    std::cout << "Hello World!\n"; 
+protected:
+	virtual CDuiString GetSkinFolder() override;							// 获取皮肤文件的目录，如果有多层目录这里可以设置
+	virtual CDuiString GetSkinFile() override;								// 设置皮肤文件名字
+	virtual LPCTSTR GetWindowClassName(void) const override;	// 设置当前窗口的 class name
+
+public:
+	static const LPCTSTR kClassName;
+	static const LPCTSTR kMainWndFrame;
+};
+
+DuiLib::CDuiString MainWndFrame::GetSkinFolder()
+{
+	// GetInstancePath 接口返回默认的皮肤文件位置
+	// 在 main 函数中我们可以通过 SetResourcePath 来设置路径
+	return m_PaintManager.GetInstancePath();
 }
 
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
+DuiLib::CDuiString MainWndFrame::GetSkinFile()
+{
+	// 成员变量定义的皮肤文件名
+	return kMainWndFrame;
+}
 
-// 入门提示: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
+LPCTSTR MainWndFrame::GetWindowClassName(void) const
+{
+	// 成员变量定义的窗口 class name
+	return kClassName;
+}
+
+const LPCTSTR MainWndFrame::kClassName = _T("main_wnd_frame");
+const LPCTSTR MainWndFrame::kMainWndFrame = _T("main_wnd_frame.xml");
+
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
+{
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	// 设置窗口关联的实例
+	CPaintManagerUI::SetInstance(hInstance);
+
+	// 设置皮肤的默认路径
+	CPaintManagerUI::SetCurrentPath(CPaintManagerUI::GetInstancePath());
+	CPaintManagerUI::SetResourcePath(_T("theme"));
+
+	// 创建窗口
+	MainWndFrame* pMainWndFrame = new MainWndFrame;
+	pMainWndFrame->Create(nullptr, MainWndFrame::kClassName, UI_WNDSTYLE_DIALOG, 0);
+	pMainWndFrame->CenterWindow();
+	pMainWndFrame->ShowWindow();
+
+	CPaintManagerUI::MessageLoop();
+
+	if (nullptr != pMainWndFrame)
+	{
+		delete pMainWndFrame;
+	}
+
+	return 0;
+}
+
+
+
